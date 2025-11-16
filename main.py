@@ -1,16 +1,42 @@
-# This is a sample Python script.
+import pygame
+import sys
+from buttons import *   # or your functions specifically
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+pygame.init()
 
+# Window 
+width = 1280
+height = 720 
+mainScreen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Pygame GUI")
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# Font
+FONT = pygame.font.SysFont("arial", 30)
 
+# Images
+startImage = pygame.image.load("images/startScreen.png")
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Game State
+gameState = "start"
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+def main():
+    global gameState
+    clock = pygame.time.Clock()
+
+    if (gameState == "start"):#Start Screen 
+        pygame.mixer.music.load("sounds/startBGM.mp3")
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.5)
+    while True:
+        mainScreen.blit(startImage, (0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.flip()
+        clock.tick(60)
+
+if __name__ == "__main__":
+    main()
