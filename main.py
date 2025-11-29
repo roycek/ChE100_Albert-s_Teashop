@@ -2,6 +2,9 @@ import pygame
 import sys
 import buttons
 
+import minigame3
+from minigame3 import run_minigame3
+
 pygame.init()
 
 # Window 
@@ -172,6 +175,8 @@ def main():
                     if dialogueNum > 3:
                         dialogueNum = 3
                         minigame = True
+                        output = run_minigame3(mainScreen, clock)
+                        print(output)
                     if dialogueNum != oldNum and (dialogueNum - 1) <= 2:
                         dialogueSound.play()
                     

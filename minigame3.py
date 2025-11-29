@@ -364,6 +364,10 @@ def run_minigame3(screen, clock):
             post_result_timer -= 1
             txt = result_f.render(post_result_text, True, (255, 245, 200) if "Successfully" in post_result_text else (255, 180, 180))
             screen.blit(txt, txt.get_rect(center=(WIDTH // 2-20, HEIGHT // 2+250)))
+            if post_result_timer == 0:
+                pygame.mixer.music.stop()
+                return {"Tea": 10, "Bitter": 10}
+
 
         pygame.display.flip()
         clock.tick(60)
