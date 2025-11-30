@@ -23,16 +23,31 @@ inGameImage = pygame.image.load("images/ingame.png")
 textBubble = pygame.image.load("images/textBubble.png")
 textBubble = pygame.transform.scale(textBubble, (600, 350))
 
+professors = [
+    [pygame.image.load("images/zhao0.png")],      # 0 - Zhao (neutral)
+    [pygame.image.load("images/hamilton0.png")],  # 1 - Hamilton (neutral)
+    [pygame.image.load("images/mintah0.png")],    # 2 - Mintah (neutral)
+    [pygame.image.load("images/pendar0.png")]     # 3 - Pendar (neutral)
+]
+
+# Reaction images
+angry = [
+    pygame.image.load("images/zhao2.png"),
+    pygame.image.load("images/hamilton2.png"),
+    pygame.image.load("images/mintah2.png"),
+    pygame.image.load("images/pendar2.png")
+]
+
+happy = [
+    pygame.image.load("images/zhao1.png"),
+    pygame.image.load("images/hamilton1.png"),
+    pygame.image.load("images/mintah1.png"),
+    pygame.image.load("images/pendar1.png")
+]
+
 # Sounds
 dialogueSound = pygame.mixer.Sound("sounds/talking.mp3")
 dialogueSound.set_volume(0.5)
-
-professors = [
-    [pygame.image.load("images/zhao0.png")],      # 0 - Zhao
-    [pygame.image.load("images/hamilton0.png")],  # 1 - Hamilton
-    [pygame.image.load("images/mintah0.png")],    # 2 - Mintah
-    [pygame.image.load("images/pendar0.png")]     # 3 - Pendar
-]
 
 # Where to draw the bubble
 bubbleX = 430
@@ -57,6 +72,9 @@ currentCustomer = customerOrder[currentCustomerIndex]
 minigame = False
 waitingForNextCustomer = False
 output = None
+
+# "neutral", "happy", "angry"
+currentExpression = "neutral"
 
 # Dialogue
 dialogue = {
@@ -121,11 +139,21 @@ def valueCheck(order: dict, result: dict):
 
 def drawCustomerDialogue(customerName):
     global dialogueNum
+    global currentExpression
 
     mainScreen.blit(inGameImage, (0, 0))
 
     customerIndex = customerIndexMap[customerName]
-    mainScreen.blit(professors[customerIndex][0], (0, -10))
+
+    # Choose image based on expression
+    if (currentExpression == "happy"):
+        profImage = happy[customerIndex]
+    elif (currentExpression == "angry"):
+        profImage = angry[customerIndex]
+    else:
+        profImage = professors[customerIndex][0]
+
+    mainScreen.blit(profImage, (0, -10))
 
     currentLines = dialogue[customerName]
 
@@ -152,6 +180,7 @@ def goToNextCustomer():
     global currentCustomer
     global gameState
     global dialogueNum
+    global currentExpression
 
     pygame.mixer.music.load("sounds/doorBell.mp3")
     pygame.mixer.music.set_volume(0.25)
@@ -164,12 +193,12 @@ def goToNextCustomer():
         currentCustomerIndex = 0
         currentCustomer = customerOrder[currentCustomerIndex]
         dialogueNum = 0
-
+        currentExpression = "neutral"
     else:
         currentCustomer = customerOrder[currentCustomerIndex]
         gameState = currentCustomer
         dialogueNum = 0
-
+        currentExpression = "neutral"
 
 def main():
     global gameState
@@ -178,7 +207,7 @@ def main():
     global minigame
     global output
     global waitingForNextCustomer
-
+    global currentExpression
     clock = pygame.time.Clock()
 
     if (gameState == "startScreen"):
@@ -187,6 +216,7 @@ def main():
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(0.5)
         startButton = buttons.create_button(554, 582, 193, 48, "")
+        howtoPlayButton = buttons.create_button(554,641,193,48, "")
 
     while True:
         for event in pygame.event.get():
@@ -200,12 +230,44 @@ def main():
                     pygame.mixer.music.load("sounds/doorBell.mp3")
                     pygame.mixer.music.set_volume(0.25)
                     gameState = "inGame"
+                if(buttons.button_clicked(howtoPlayButton,event)):
+                    gameState = "howToPlay"
+            elif (gameState == "howToPlay"):
+                mainScreen.fill((0, 0, 0))
 
+                instructions = [
+                    "HOW TO PLAY",
+                    "",
+                    "Press ENTER to advance dialogue.",
+                    "Your goal is to prepare each customer's drink",
+                    "by matching their order using the minigame.",
+                    "",
+                    "The minigame works like an Euler Trail:",
+                    "you must trace edges exactly once",
+                    "to choose the ingredients.",
+                    "",
+                    "Match their order perfectly to earn a Perfect score!",
+                    "",
+                    "Press ENTER to begin."
+                ]
+
+                base_y = 100
+                spacing = 40
+
+                for i, line in enumerate(instructions):
+                    textSurface = dialogueFont.render(line, True, (255, 255, 255))
+                    textX = (width - textSurface.get_width()) // 2
+                    textY = base_y + i * spacing
+                    mainScreen.blit(textSurface, (textX, textY))
+                if(enterReleased(event)):
+                    gameState = "inGame"
+                
             elif (gameState == "inGame"):
                 if (enterReleased(event)):
                     pygame.mixer.music.play()
                     gameState = currentCustomer
                     dialogueNum = 0
+                    currentExpression = "neutral"
 
             elif (gameState in ["Zhao", "Hamilton", "Mintah", "Pendar"]):
 
@@ -237,10 +299,13 @@ def main():
 
                         if (result == "Perfect"):
                             dialogueNum = 4
+                            currentExpression = "happy"
                         elif (result == "Good"):
                             dialogueNum = 5
-                        else:
+                            currentExpression = "neutral"
+                        else:  # "Bad"
                             dialogueNum = 6
+                            currentExpression = "angry"
 
                         dialogueSound.play()
                         minigame = False
@@ -255,12 +320,14 @@ def main():
 
         elif (gameState in ["Zhao", "Hamilton", "Mintah", "Pendar"]):
             drawCustomerDialogue(gameState)
+
         elif (gameState == "gameComplete"):
             mainScreen.fill((0, 0, 0))
             textSurface = dialogueFont.render("Thank you for playing!", True, (255, 255, 255))
             textX = (width - textSurface.get_width()) // 2
             textY = (height - textSurface.get_height()) // 2
             mainScreen.blit(textSurface, (textX, textY))
+
         pygame.display.flip()
         clock.tick(60)
 
