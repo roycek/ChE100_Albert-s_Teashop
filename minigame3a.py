@@ -47,147 +47,62 @@ class PatternNode:
 
 def cast_spell(screen, clock, spell, background_image):
     """
-    Runs the casting minigame for a single spell.
-    Returns True on success, False on failure.
-    While this is running the spellbook is NOT drawn by caller.
-    The background_image is still drawn (user requested).
+    New version:
+    Instead of drawing nodes and detecting a pattern,
+    this version draws a grid centered on the screen and a center dot.
+
+    Always returns True (or you can change logic later).
     """
 
     WIDTH, HEIGHT = screen.get_size()
+    cx, cy = WIDTH // 2, HEIGHT // 2
 
-    # Fonts for casting UI
-    node_font = pygame.font.Font("Assets/MagicSchoolOne.ttf", 28)
-
-    # Create PatternNodes from spell.node_positions
-    nodes = [PatternNode(pos, i) for i, pos in enumerate(spell.node_positions)]
-    next_required = 0
-    hovered_prev = None
-    running_cast = True
-    result = None  # None while in progress, True success, False fail
-
-    # Load images
-    teacup_img = pygame.image.load("Assets/Teacup.png").convert_alpha()
-    teacup_img = pygame.transform.scale(teacup_img, (120, 120))
-    star_img = pygame.image.load("Assets/GoldStar.png").convert_alpha()
-    star_img = pygame.transform.scale(star_img, (24, 24))
-    x_img = pygame.image.load("Assets/RedX.png").convert_alpha()
-    x_img = pygame.transform.scale(x_img, (32, 32))
-
-    ding = pygame.mixer.Sound("Assets/ding.mp3")
-    error = pygame.mixer.Sound("Assets/error.mp3")
-
-    teacup_pos = (WIDTH // 2 - 60, HEIGHT // 2 - 60)
-    effects = []
-    effect_timer = 120  # 3 seconds
-
-    def draw_pattern_guides():
-        if len(nodes) > 1:
-            pts = [n.pos for n in nodes]
-            pygame.draw.lines(screen, (120, 180, 200), False, pts, 4)
-
-    while running_cast:
-        mouse = pygame.mouse.get_pos()
+    running = True
+    duration = 12000  # Show grid for ~2 seconds (60 FPS)
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
                 return False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return False
 
-        hovered_now = None
-        for n in nodes:
-            if n.is_hover(mouse):
-                hovered_now = n.index
-                break
-
+        # Draw background
         screen.blit(background_image, (0, 0))
 
-        if result is None:
-            draw_pattern_guides()
-            for n in nodes:
-                n.draw(screen, node_font)
+        # -----------------------------
+        # Draw grid (every 20 px)
+        # -----------------------------
+        step = 20
+        grid_color = (255, 255, 255, 60)
 
-            if hovered_now is not None and hovered_now != hovered_prev:
-                node = nodes[hovered_now]
-                if node.traced:
-                    error.play()
-                    result = False
-                else:
-                    if node.index == next_required:
-                        ding.play()
-                        node.traced = True
-                        next_required += 1
-                        if next_required >= len(nodes):
-                            result = True
-                    else:
-                        error.play()
-                        result = False
+        # Vertical lines (center → outwards)
+        for x in range(cx, WIDTH, step):
+            pygame.draw.line(screen, grid_color, (x, 0), (x, HEIGHT))
+        for x in range(cx, 0, -step):
+            pygame.draw.line(screen, grid_color, (x, 0), (x, HEIGHT))
 
-            hovered_prev = hovered_now
+        # Horizontal lines
+        for y in range(cy, HEIGHT, step):
+            pygame.draw.line(screen, grid_color, (0, y), (WIDTH, y))
+        for y in range(cy, 0, -step):
+            pygame.draw.line(screen, grid_color, (0, y), (WIDTH, y))
 
-            if next_required < len(nodes):
-                nx = nodes[next_required]
-                pygame.draw.circle(screen, (80, 200, 230), nx.pos, nx.radius + 6, 3)
+        # -----------------------------
+        # Draw center dot
+        # -----------------------------
+        pygame.draw.circle(screen, (255, 255, 255), (cx, cy), 3)
 
-        else:
-            # --- TEACUP + IMAGE EFFECTS ---
-            # Generate effects once
-            if not effects:
-                teacup_center = (teacup_pos[0] + teacup_img.get_width()//2,
-                                 teacup_pos[1] + teacup_img.get_height()//2)
-                num_effects = 25 if result else 15
-                for _ in range(num_effects):
-                    dx = random.randint(-80, 80)
-                    dy = random.randint(-60, 60)
-                    spawn_delay = random.randint(0, 30)
-                    effects.append({
-                        'pos': [teacup_center[0] + dx, teacup_center[1] + dy],
-                        'spawn_delay': spawn_delay,
-                        'spawned': False,
-                        'alpha': 255,
-                        'vy': -random.uniform(0.5, 1.5) if result else 0  # floating
-                    })
-
-            # Draw teacup
-            screen.blit(teacup_img, teacup_pos)
-
-            # Draw effects
-            for e in effects:
-                if e['spawn_delay'] > 0:
-                    e['spawn_delay'] -= 1
-                    continue
-                if not e['spawned']:
-                    e['spawned'] = True
-
-                x, y = e['pos']
-
-                if result:
-                    # floating/fading star
-                    y += e['vy']
-                    e['pos'][1] = y
-                    e['alpha'] = max(e['alpha'] - 3, 0)
-                    if e['alpha'] <= 0:
-                        continue
-
-                    # Draw star image with alpha
-                    star_surf = star_img.copy()
-                    star_surf.fill((255, 255, 255, e['alpha']), special_flags=pygame.BLEND_RGBA_MULT)
-                    screen.blit(star_surf, (x - star_surf.get_width()//2, y - star_surf.get_height()//2))
-
-                else:
-                    # Draw static red X
-                    screen.blit(x_img, (x - x_img.get_width()//2, y - x_img.get_height()//2))
-
-            effect_timer -= 1
-            if effect_timer <= 0:
-                running_cast = False
+        # -----------------------------
+        # Exit after short delay
+        # -----------------------------
+        duration -= 1
+        if duration <= 0:
+            running = False
 
         pygame.display.flip()
         clock.tick(60)
 
-    return bool(result)
-
-
+    return True
 
 
 # -------------------------
@@ -241,215 +156,236 @@ def run_minigame3(screen, clock):
 
     # Helper to place relative to center
     def rel(dx, dy):
-        return cx + dx*20, cy + dy*20
+        return cx + dx, cy + dy
 
     spells = [
         # 1 — angular 'B' shape (top-left)
         Spell(
-            "Honeywhisper",
-            "Aspects: Sweet +2",
+            "Bramble Bend",
+            "Aspects: Earthy +1, Bitter +1",
             ["Bramaris", "Thornvox", "Cortegen"],
             (110, 90, 70),
             # angular zigzag / folded L
             [
-                rel(-5,5), rel(0,-8), rel(5,5), rel(-6,-5), rel(6, -5), rel(-3,3)
+                rel(-120, -60), rel(-40, -20), rel(-100, 20),
+                rel(-20, 40), rel(-80, 80), rel(0, 100),
+                rel(80, 80), rel(40, 20), rel(120, -20),
+                rel(40, -80)
             ]
         ),
 
         # 2 — star (pentagram / star)
         Spell(
-            "Sugar Sigil",
-            "Aspects: Sweet +1",
+            "Starpoint",
+            "Aspects: Sweet +1, Floral +1",
             ["Astralis", "Penthera", "Lumistar"],
             (240, 210, 220),
             # star pentagon crossing nodes
             [
-                rel(-7, -5), rel(0,5), rel(7,-5), rel(7, 5), rel(0,-5), rel(-7,5)
+                rel(0, -130), rel(40, -10), rel(130, -30),
+                rel(60, 40), rel(100, 120), rel(0, 70),
+                rel(-100, 120), rel(-60, 40), rel(-130, -30),
+                rel(-40, -10)
             ]
         ),
 
         # 3 — spiral (large smooth inward spiral)
         Spell(
-            "Citrus Pulse",
-            "Aspects: Citrus +2",
+            "Gyrecoil",
+            "Aspects: Tea +2",
             ["Gyrevex", "Spiraflux", "Helixor"],
             (180, 160, 120),
             # smooth inward spiral (approximated by ring of nodes)
             [
-                rel(6,-3), rel(3,-5), rel(0,-6), rel(-3,-5), rel(-6,-3),
-                rel(-6,0), rel(6,0), rel(6,3), rel(3,5), rel(0,6), rel(-3,5),
-                rel(-6,3)
+                rel(0, -140), rel(50, -120), rel(100, -70),
+                rel(110, -10), rel(90, 50), rel(40, 90),
+                rel(-20, 110), rel(-80, 90), rel(-110, 20),
+                rel(-70, -40)
             ]
         ),
 
         # 4 — dense scribble / hatch (chaotic block)
         Spell(
-            "Lemonflare",
-            "Aspects: Citrus +1, Sweet +1",
+            "Scrib Quell",
+            "Aspects: Spice +1, Bitter +1",
             ["Ragamorg", "Ravelis", "Skratcha"],
             (90, 90, 110),
             # dense crossed hatch: several short zig nodes forming the block
             [
-                rel(-8,0), rel(-4,6), rel(4,6), rel(8,0), rel(2,2),
-                rel(0,-9), rel(-2,2), rel(-6,1)
+                rel(-80, -120), rel(-40, -80), rel(10, -110),
+                rel(50, -70), rel(80, -100), rel(60, -40),
+                rel(0, -10), rel(-40, 10), rel(-10, 60),
+                rel(40, 80)
             ]
         ),
 
         # 5 — smooth 'S' curve
         Spell(
-            "Tealeaf Invocation",
-            "Aspects: Tea +2",
+            "Serpent Sway",
+            "Aspects: Creamy +1, Tea +1",
             ["Seraphae", "Sinuara", "Silvena"],
             (200, 180, 170),
             # long S-curve with 8 nodes
             [
-                rel(-5,7), rel(-9,-4), rel(-3,-7), rel(-7,1), rel(3,-2), rel(0,7), rel(-3,-2),
-                rel(7,1), rel(3,-7), rel(9,-4), rel(5,7)
+                rel(-100, -90), rel(-40, -120), rel(20, -80),
+                rel(60, -20), rel(40, 40), rel(-10, 80),
+                rel(-60, 100), rel(-90, 60)
             ]
         ),
 
         # 6 — lightning slash with long tail
         Spell(
-            "Earlgrey Echo",
-            "Aspects: Tea +1, Citrus +1",
+            "Voltline",
+            "Aspects: Citrus +1, Spice +1",
             ["Voltaris", "Zapkern", "Thundrix"],
             (220, 200, 80),
             # sharp zig then long diagonal tail
             [
-                rel(-7,-10), rel(7,-10), rel(-7,-5), rel(7,-5), rel(-7,0), rel(7,0),
-                rel(0,7), rel(0,-14)
+                rel(-40, -120), rel(20, -80), rel(-10, -40),
+                rel(60, -10), rel(20, 40), rel(100, 80),
+                rel(140, 100), rel(120, 40), rel(100, 0),
+                rel(40, -40)
             ]
         ),
 
         # 7 — loop with diagonal tick (circle+slash)
         Spell(
-            "Chai Ember",
-            "Aspects: Spice +2, Tea +1",
+            "Hookturn",
+            "Aspects: Mint +1, Citrus +1",
             ["Loopent", "Crovis", "Torsha"],
             (160, 230, 200),
             # circle-ish loop with a diagonal tick crossing
             [
-                rel(0,-10), rel(-6,-4), rel(4,-4), rel(9,3), rel(-6,3), rel(9,-4),
-                rel(0,7), rel(0,-7), rel(9,-7)
+                rel(-80, 0), rel(-40, -80), rel(20, -110),
+                rel(80, -80), rel(110, -10), rel(80, 60),
+                rel(20, 100), rel(-40, 100), rel(-80, 60),
+                rel(-20, 20)
             ]
         ),
 
         # 8 — 'D' with rectangle inside (boxy)
         Spell(
-            "Cinnamon Weave",
-            "Aspects: Spice +1",
+            "Lockplate",
+            "Aspects: Tea +1, Creamy +1",
             ["Rectalus", "Plaxion", "Vaulten"],
             (140, 150, 170),
             # rounded D-outline plus inner rectangular nodes
             [
-                rel(0, -10), rel(-2, -4), rel(-8, -10), rel(-4, -2),
-                rel(0, 6), rel(4, -2), rel(8, -10), rel(2, -4)
+                rel(-80, -80), rel(20, -120), rel(100, -60),
+                rel(100, 20), rel(40, 80), rel(-20, 100),
+                rel(-60, 80), rel(-80, 20), rel(-60, -10),
+                rel(-20, -40)
             ]
         ),
 
         # 9 — crossed M / diamond zigzag
         Spell(
-            "Herbal Bloom",
-            "Aspects: Herbal +2",
+            "Twincrest",
+            "Aspects: Bitter +1, Spice +1",
             ["Diacrit", "Zemmar", "Crestor"],
             (190, 160, 140),
             # sharp zigzags forming a double-peak diamond
             [
-                rel(0, -8), rel(6, 0), rel(0, 8), rel(-6, 0),
-                rel(3, -3), rel(-3, -3), rel(3, 3), rel(-3, 3),
+                rel(-120, 0), rel(-40, -90), rel(10, 0),
+                rel(60, -90), rel(120, 10), rel(60, 70),
+                rel(0, 20), rel(-60, 90), rel(-110, 40),
+                rel(-70, -10)
             ]
         ),
 
         # 10 — U-turn with downward hook
         Spell(
-            "Garden Draught",
+            "Downpivot",
             "Aspects: Herbal +1, Tea +1",
             ["Hookrun", "Trogla", "Pendrix"],
             (120, 180, 150),
             # U shape turning down then a short hook
             [
-                rel(-8, 6), rel(-4, -10), rel(-1, -4),
-                rel(1, -4), rel(4, -10), rel(8, 6),
-                rel(0, -2), rel(0, 4)
+                rel(-60, -80), rel(-40, 0), rel(-20, 80),
+                rel(20, 120), rel(80, 80), rel(80, 20),
+                rel(40, -20), rel(0, -40), rel(-20, -60),
+                rel(-40, -40)
             ]
         ),
 
         # 11 — spiral arrow / curl-to-arrow
         Spell(
-            "Mintwhirl",
-            "Aspects: Mint +2",
+            "Gyroarrow",
+            "Aspects: Citrus +1, Sweet +1",
             ["Spiralux", "Orien", "Gyralon"],
             (220, 200, 160),
             # small inward spiral then an outward arrow point
             [
-                rel(6, -2), rel(4, -6), rel(0, -8), rel(-4, -6),
-                rel(-6, -2), rel(-4, 4), rel(0, 6), rel(4, 4),
-                rel(6, 0)
+                rel(-20, -80), rel(20, -120), rel(70, -80),
+                rel(90, -20), rel(80, 30), rel(40, 70),
+                rel(0, 110), rel(-40, 80), rel(-80, 40),
+                rel(-40, 10)
             ]
         ),
 
         # 12 — three diagonal slashes (parallel)
         Spell(
-            "Frostmint Snap",
-            "Aspects: Mint +1, Citrus +1",
+            "Triscratch",
+            "Aspects: Spice +2",
             ["Clavix", "Tremor", "Rendrix"],
             (210, 120, 100),
             # three near-parallel slashes approximated by staggered nodes
             [
-                rel(0, -8), rel(0, 8),  # vertical ray
-                rel(-8, 0), rel(8, 0),  # horizontal ray
-                rel(-4, -4), rel(4, -4),  # inner diamond
-                rel(4, 4), rel(-4, 4)
+                rel(-100, -120), rel(-60, -60), rel(-20, -20),
+                rel(20, 20), rel(60, 60), rel(100, 120),
+                rel(60, 80), rel(20, 40), rel(-20, -40),
+                rel(-60, -80)
             ]
         ),
 
         # 13 — tall U / cup-hold (boxy cup)
         Spell(
-            "Creamweave",
-            "Aspects: Creamy +2",
+            "Cuphold",
+            "Aspects: Creamy +2, Sweet +1",
             ["Caffara", "Urbina", "Lacton"],
             (255, 240, 220),
             # tall U with squared base
             [
-                rel(-10, 0), rel(-8, -4), rel(-4, -7), rel(0, -8),
-                rel(4, -7), rel(8, -4), rel(10, 0),
-                rel(6, 2), rel(3, 4), rel(0, 6), rel(-3, 4), rel(-6, 2)
+                rel(-80, -120), rel(-80, -20), rel(-80, 60),
+                rel(-20, 120), rel(40, 120), rel(100, 60),
+                rel(100, -20), rel(40, -80), rel(-20, -90),
+                rel(-40, -60)
             ]
         ),
 
         # 14 — pointed boat / sail spikes
         Spell(
-            "Velvetfoam",
-            "Aspects: Creamy +1, Sweet +1",
+            "Keelflare",
+            "Aspects: Herbal +1, Floral +1",
             ["Keelion", "Trianta", "Sailorix"],
             (170, 200, 180),
             # three-point sail-like spikes rising from a base
             [
-                rel(-10, -8), rel(-6, -4), rel(-2, 0),
-                rel(2, -4), rel(6, -8),
-                rel(0, 2), rel(0, 6)
+                rel(-110, 40), rel(-40, 100), rel(20, 30),
+                rel(60, -80), rel(100, 10), rel(60, 90),
+                rel(10, 120), rel(-40, 100), rel(-80, 80),
+                rel(-100, 40)
             ]
         ),
 
         # 15 — concentric spiral / heart-like looping circle (bottom-right)
         Spell(
-            "Darkroast Surge",
-            "Aspects: Bitter +2",
+            "Coreheart",
+            "Aspects: Sweet +2, Floral +1",
             ["Cordalis", "Orbheart", "Amorix"],
             (255, 200, 210),
             # outer loop + inner curl approximated with nodes
             [
-                rel(0, -16), rel(-4, -10), rel(-2, -5), rel(0, -1), rel(2, -5), rel(4, -10),
-                rel(0, -12), rel(0, -6), rel(0, 4), rel(0, 10)
+                rel(0, -120), rel(60, -100), rel(110, -40),
+                rel(120, 20), rel(100, 80), rel(40, 110),
+                rel(-20, 110), rel(-80, 80), rel(-110, 20),
+                rel(-40, -20)
             ]
         ),
     ]
 
     current_page = 0
     running = True
-
-    tea_formulation = {}
-    spells_remaining = 3
 
     # State for showing a message (after cast success/fail)
     post_result_text = ""
@@ -478,17 +414,8 @@ def run_minigame3(screen, clock):
                         # Start casting: hide the book and run cast_spell()
                         active_spell = spells[current_page]
                         success = cast_spell(screen, clock, active_spell, background_image)
-                        spells_remaining -= 1
                         if success:
                             post_result_text = "Spell Cast Successfully!"
-                            print(type(active_spell.aspects))
-                            parsed_aspects = active_spell.aspects.replace("Aspects: ","").replace("+", "").replace(",", "").split(" ")
-                            spell_dict = {parsed_aspects[i]:parsed_aspects[i+1] for i in range(0, len(parsed_aspects), 2)}
-                            for aspect in spell_dict.keys():
-                                if aspect in tea_formulation.keys():
-                                    tea_formulation[aspect] += int(spell_dict[aspect])
-                                else:
-                                    tea_formulation[aspect] = int(spell_dict[aspect])
                         else:
                             post_result_text = "Spell Cast Failed."
                         post_result_timer = 90  # show for 1.5 seconds
@@ -534,8 +461,6 @@ def run_minigame3(screen, clock):
             post_result_timer -= 1
             txt = result_f.render(post_result_text, True, (255, 245, 200) if "Successfully" in post_result_text else (255, 180, 180))
             screen.blit(txt, txt.get_rect(center=(WIDTH // 2-20, HEIGHT // 2+250)))
-            if post_result_timer == 0 and spells_remaining == 0:
-                return tea_formulation
 
 
         pygame.display.flip()
