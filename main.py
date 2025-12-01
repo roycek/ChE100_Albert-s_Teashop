@@ -53,7 +53,7 @@ dialogueSound.set_volume(0.5)
 bubbleX = 430
 bubbleY = 0
 
-# For mapping gameState -> professor index
+# For mapping gameState -> professor index for images
 customerIndexMap = {
     "Zhao": 0,
     "Hamilton": 1,
@@ -111,7 +111,7 @@ dialogue = {
         "I could've made tea better \nthan this when I was two years old."
     ]
 }
-
+# Target ingredient amounts for each customer
 orderList = {
     "Zhao": {"Tea": 2, "Bitter": 10},
     "Hamilton": {"Tea": 2, "Spice": 1, "Sweet": 1},
@@ -119,13 +119,21 @@ orderList = {
     "Pendar": {"Mint": 2, "Spice": 1, "Citrus": 1, "Sweet": 1}
 }
 
-def enterReleased(event):
+def enterReleased(event):#AH
+    '''
+    (Event) -> bool
+    Returns true when enter key is released. 
+    '''
     return (
         event.type == pygame.KEYUP and
         (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER)
     )
 
-def valueCheck(order: dict, result: dict):
+def valueCheck(order: dict, result: dict):#AH
+    """
+    (dict, dict) -> str
+    Compare the required order with the minigame result.
+    """
     for key in order:
         if key not in result:
             return "Bad"
@@ -137,8 +145,12 @@ def valueCheck(order: dict, result: dict):
         return "Perfect"
     return "Good"
 
-def drawCustomerDialogue(customerName):
-    global dialogueNum
+def drawCustomerDialogue(customerName):#AH
+    """
+    (str) -> None
+    Draw the customer's sprite and dialogue text.
+    """
+    global dialogueNum  
     global currentExpression
 
     mainScreen.blit(inGameImage, (0, 0))
@@ -176,6 +188,10 @@ def drawCustomerDialogue(customerName):
                 mainScreen.blit(textSurface, (textX, textY))
 
 def goToNextCustomer():
+    """
+    () -> None
+    Move to the next customer and reset dialogue state.
+    """
     global currentCustomerIndex
     global currentCustomer
     global gameState
@@ -201,6 +217,10 @@ def goToNextCustomer():
         currentExpression = "neutral"
 
 def main():
+    """
+    () -> None
+    Main game loop controlling menus, dialogue, and minigames.
+    """
     global gameState
     global dialogueNum
     global currentCustomer
@@ -235,7 +255,7 @@ def main():
             elif (gameState == "howToPlay"):
                 mainScreen.fill((0, 0, 0))
 
-                instructions = [
+                instructions = [#Explanation of how to play
                     "HOW TO PLAY",
                     "",
                     "Press ENTER to advance dialogue.",
@@ -271,19 +291,17 @@ def main():
 
             elif (gameState in ["Zhao", "Hamilton", "Mintah", "Pendar"]):
 
-                # After result line, wait for Enter to go to next customer
-                if (waitingForNextCustomer):
+                if (waitingForNextCustomer): #AH: After result line, wait for Enter to go to next customer
                     if (enterReleased(event)):
                         waitingForNextCustomer = False
                         goToNextCustomer()
 
                 else:
-                    # Normal dialogue advance up to line 3, then minigame
                     if (enterReleased(event) and (minigame == False)):
                         oldNum = dialogueNum
 
                         dialogueNum += 1
-                        if (dialogueNum > 3):
+                        if (dialogueNum > 3):#AH: Starting minigame 
                             dialogueNum = 3
                             minigame = True
                             output = run_minigame3(mainScreen, clock)
@@ -291,8 +309,7 @@ def main():
                         if (dialogueNum != oldNum and (dialogueNum - 1) <= 2):
                             dialogueSound.play()
 
-                    # Generic result handling for any professor
-                    if ((gameState in orderList) and minigame and (output is not None)):
+                    if ((gameState in orderList) and minigame and (output is not None)):#AH: Result checking 
                         prof = gameState
                         result = valueCheck(orderList[prof], output)
                         print(result)
@@ -303,7 +320,7 @@ def main():
                         elif (result == "Good"):
                             dialogueNum = 5
                             currentExpression = "neutral"
-                        else:  # "Bad"
+                        else:  #Bad
                             dialogueNum = 6
                             currentExpression = "angry"
 
