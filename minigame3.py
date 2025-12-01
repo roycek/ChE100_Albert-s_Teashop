@@ -38,8 +38,8 @@ class PatternNode:
         pygame.draw.circle(screen, fill, (x, y), self.radius)
         pygame.draw.circle(screen, border, (x, y), self.radius, 3)
         # Draw index number
-        #num_surf = font.render(str(self.index + 1), True, (10, 10, 10))
-        #screen.blit(num_surf, num_surf.get_rect(center=(x, y)))
+        num_surf = font.render(str(self.index + 1), True, (10, 10, 10))
+        screen.blit(num_surf, num_surf.get_rect(center=(x, y)))
 
     def is_hover(self, mouse_pos):
         return math.dist(self.pos, mouse_pos) <= self.radius
