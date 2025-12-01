@@ -14,7 +14,7 @@ class Spell:
         self.name = name
         self.aspects = aspects
         self.words = words
-        self.icon_color = icon_color
+        self.icon = icon_color
         self.node_positions = node_positions
 
 
@@ -38,8 +38,8 @@ class PatternNode:
         pygame.draw.circle(screen, fill, (x, y), self.radius)
         pygame.draw.circle(screen, border, (x, y), self.radius, 3)
         # Draw index number
-        num_surf = font.render(str(self.index + 1), True, (10, 10, 10))
-        screen.blit(num_surf, num_surf.get_rect(center=(x, y)))
+        #num_surf = font.render(str(self.index + 1), True, (10, 10, 10))
+        #screen.blit(num_surf, num_surf.get_rect(center=(x, y)))
 
     def is_hover(self, mouse_pos):
         return math.dist(self.pos, mouse_pos) <= self.radius
@@ -214,12 +214,15 @@ def run_minigame3(screen, clock):
     WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
-    title_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 80)
+    title_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 70)
     aspects_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 30)
     words_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 60)
     button_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 32)
     arrow_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 22)
     result_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 52)
+    casts_remaining_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 90)
+    formulation_f = pygame.font.Font("Assets/MagicSchoolOne.ttf", 35)
+
 
     # Book position & page layout
     book_w, book_h = 800, 500
@@ -246,10 +249,11 @@ def run_minigame3(screen, clock):
     spells = [
         # 1 — angular 'B' shape (top-left)
         Spell(
-            "Honeywhisper",
+            "Honeywisp",
             "Aspects: Sweet +2",
             ["Bramaris", "Thornvox", "Cortegen"],
-            (110, 90, 70),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/HoneyWhisper.png").convert_alpha(),
+                                   (160, 160)),
             # angular zigzag / folded L
             [
                 rel(-5,5), rel(0,-8), rel(5,5), rel(-6,-5), rel(6, -5), rel(-3,3)
@@ -261,7 +265,7 @@ def run_minigame3(screen, clock):
             "Sugar Sigil",
             "Aspects: Sweet +1",
             ["Astralis", "Penthera", "Lumistar"],
-            (240, 210, 220),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/SugarSigil.png").convert_alpha(), (160,160)),
             # star pentagon crossing nodes
             [
                 rel(-7, -5), rel(0,5), rel(7,-5), rel(7, 5), rel(0,-5), rel(-7,5)
@@ -273,7 +277,7 @@ def run_minigame3(screen, clock):
             "Citrus Pulse",
             "Aspects: Citrus +2",
             ["Gyrevex", "Spiraflux", "Helixor"],
-            (180, 160, 120),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/CitrusPulse.png").convert_alpha(), (160,160)),
             # smooth inward spiral (approximated by ring of nodes)
             [
                 rel(6,-3), rel(3,-5), rel(0,-6), rel(-3,-5), rel(-6,-3),
@@ -287,7 +291,7 @@ def run_minigame3(screen, clock):
             "Lemonflare",
             "Aspects: Citrus +1, Sweet +1",
             ["Ragamorg", "Ravelis", "Skratcha"],
-            (90, 90, 110),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/Lemonflare.png").convert_alpha(), (160,160)),
             # dense crossed hatch: several short zig nodes forming the block
             [
                 rel(-8,0), rel(-4,6), rel(4,6), rel(8,0), rel(2,2),
@@ -297,10 +301,10 @@ def run_minigame3(screen, clock):
 
         # 5 — smooth 'S' curve
         Spell(
-            "Tealeaf Invocation",
+            "Tealeaf Rite",
             "Aspects: Tea +2",
             ["Seraphae", "Sinuara", "Silvena"],
-            (200, 180, 170),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/TealeafInvocation.png").convert_alpha(), (160,160)),
             # long S-curve with 8 nodes
             [
                 rel(-5,7), rel(-9,-4), rel(-3,-7), rel(-7,1), rel(3,-2), rel(0,7), rel(-3,-2),
@@ -310,10 +314,10 @@ def run_minigame3(screen, clock):
 
         # 6 — lightning slash with long tail
         Spell(
-            "Earlgrey Echo",
+            "Earl Echo",
             "Aspects: Tea +1, Citrus +1",
             ["Voltaris", "Zapkern", "Thundrix"],
-            (220, 200, 80),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/EarlgreyEcho.png").convert_alpha(), (160,160)),
             # sharp zig then long diagonal tail
             [
                 rel(-7,-10), rel(7,-10), rel(-7,-5), rel(7,-5), rel(-7,0), rel(7,0),
@@ -326,7 +330,7 @@ def run_minigame3(screen, clock):
             "Chai Ember",
             "Aspects: Spice +2, Tea +1",
             ["Loopent", "Crovis", "Torsha"],
-            (160, 230, 200),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/ChaiEmber.png").convert_alpha(), (160,160)),
             # circle-ish loop with a diagonal tick crossing
             [
                 rel(0,-10), rel(-6,-4), rel(4,-4), rel(9,3), rel(-6,3), rel(9,-4),
@@ -336,10 +340,10 @@ def run_minigame3(screen, clock):
 
         # 8 — 'D' with rectangle inside (boxy)
         Spell(
-            "Cinnamon Weave",
+            "Cinnamon",
             "Aspects: Spice +1",
             ["Rectalus", "Plaxion", "Vaulten"],
-            (140, 150, 170),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/CinnamonWeave.png").convert_alpha(), (160,160)),
             # rounded D-outline plus inner rectangular nodes
             [
                 rel(0, -10), rel(-2, -4), rel(-8, -10), rel(-4, -2),
@@ -349,10 +353,10 @@ def run_minigame3(screen, clock):
 
         # 9 — crossed M / diamond zigzag
         Spell(
-            "Herbal Bloom",
+            "Herb Bloom",
             "Aspects: Herbal +2",
             ["Diacrit", "Zemmar", "Crestor"],
-            (190, 160, 140),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/HerbalBloom.png").convert_alpha(), (160,160)),
             # sharp zigzags forming a double-peak diamond
             [
                 rel(0, -8), rel(6, 0), rel(0, 8), rel(-6, 0),
@@ -362,10 +366,10 @@ def run_minigame3(screen, clock):
 
         # 10 — U-turn with downward hook
         Spell(
-            "Garden Draught",
+            "Ley Garden",
             "Aspects: Herbal +1, Tea +1",
             ["Hookrun", "Trogla", "Pendrix"],
-            (120, 180, 150),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/GardenDraught.png").convert_alpha(), (160,160)),
             # U shape turning down then a short hook
             [
                 rel(-8, 6), rel(-4, -10), rel(-1, -4),
@@ -379,7 +383,7 @@ def run_minigame3(screen, clock):
             "Mintwhirl",
             "Aspects: Mint +2",
             ["Spiralux", "Orien", "Gyralon"],
-            (220, 200, 160),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/Mintwhirl.png").convert_alpha(), (160,160)),
             # small inward spiral then an outward arrow point
             [
                 rel(6, -2), rel(4, -6), rel(0, -8), rel(-4, -6),
@@ -390,10 +394,10 @@ def run_minigame3(screen, clock):
 
         # 12 — three diagonal slashes (parallel)
         Spell(
-            "Frostmint Snap",
+            "Frost Snap",
             "Aspects: Mint +1, Citrus +1",
             ["Clavix", "Tremor", "Rendrix"],
-            (210, 120, 100),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/FrostmintSnap.png").convert_alpha(), (160,160)),
             # three near-parallel slashes approximated by staggered nodes
             [
                 rel(0, -8), rel(0, 8),  # vertical ray
@@ -408,7 +412,7 @@ def run_minigame3(screen, clock):
             "Creamweave",
             "Aspects: Creamy +2",
             ["Caffara", "Urbina", "Lacton"],
-            (255, 240, 220),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/CreamyWeave.png").convert_alpha(), (160,160)),
             # tall U with squared base
             [
                 rel(-10, 0), rel(-8, -4), rel(-4, -7), rel(0, -8),
@@ -422,7 +426,7 @@ def run_minigame3(screen, clock):
             "Velvetfoam",
             "Aspects: Creamy +1, Sweet +1",
             ["Keelion", "Trianta", "Sailorix"],
-            (170, 200, 180),
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/Velvetfoam.png").convert_alpha(), (160,160)),
             # three-point sail-like spikes rising from a base
             [
                 rel(-10, -8), rel(-6, -4), rel(-2, 0),
@@ -433,10 +437,10 @@ def run_minigame3(screen, clock):
 
         # 15 — concentric spiral / heart-like looping circle (bottom-right)
         Spell(
-            "Darkroast Surge",
+            "Dark Surge",
             "Aspects: Bitter +2",
-            ["Cordalis", "Orbheart", "Amorix"],
-            (255, 200, 210),
+            ["Cordalis", "Orbheart", "Amorix", "Bittera"],
+            pygame.transform.scale(pygame.image.load("Assets/Spell Glyphs/DarkroastSurge.png").convert_alpha(), (160,160)),
             # outer loop + inner curl approximated with nodes
             [
                 rel(0, -16), rel(-4, -10), rel(-2, -5), rel(0, -1), rel(2, -5), rel(4, -10),
@@ -501,27 +505,35 @@ def run_minigame3(screen, clock):
         screen.blit(spellbook_image, (book_x, book_y))
         spell = spells[current_page]
 
+        casts_remaining  = casts_remaining_f.render(f"{spells_remaining} casts remaining", True, (0, 0, 0))
+        screen.blit(casts_remaining, (book_x + 200, book_y - 80))
+
+        tea_formulation_test = formulation_f.render("Tea Formulation:", True, (255, 255, 255))
+        screen.blit(tea_formulation_test, (book_x - 150, book_y + 100))
+
+        for index, (aspect, amount) in enumerate(tea_formulation.items(), start=1):
+            aspect_text = formulation_f.render(f"{aspect}: {amount}", True, (255, 255, 255))
+            screen.blit(aspect_text, (book_x - 150, book_y + 120 + index * 30))
+
         # LEFT PAGE: title, icon, aspects
-        title_surface = title_f.render(spell.name, True, (255, 240, 200))
-        screen.blit(title_surface, (left_page_x-20, left_page_y))
+        title_surface = title_f.render(spell.name, True, (0, 0, 0))
+        screen.blit(title_surface, (left_page_x-15, left_page_y))
 
-        icon_surface = pygame.Surface((160, 160))
-        icon_surface.fill(spell.icon_color)
-        screen.blit(icon_surface, (left_page_x + 20, left_page_y + 100))
+        screen.blit(spell.icon, (left_page_x + 20, left_page_y + 100))
 
-        aspects_surface = aspects_f.render(spell.aspects, True, (255, 240, 200))
+        aspects_surface = aspects_f.render(spell.aspects, True, (0, 0, 0))
         screen.blit(aspects_surface, (left_page_x, left_page_y + 270))
 
         # RIGHT PAGE: magical words
         for i, word in enumerate(spell.words):
-            wsurf = words_f.render(word, True, (220, 255, 255))
+            wsurf = words_f.render(word, True, (0, 0, 0))
             screen.blit(wsurf, (right_page_x, right_page_y + 60 + i * 60))
 
         # Cast button
         hovered = button_rect.collidepoint(mouse)
         color = (215, 200, 255) if hovered else (190, 175, 235)
         pygame.draw.rect(screen, color, button_rect, border_radius=12)
-        btn_text = button_f.render("Cast Spell", True, (40, 20, 80))
+        btn_text = button_f.render("Cast Spell", True, (0, 0, 0))
         screen.blit(btn_text, btn_text.get_rect(center=button_rect.center))
 
         # Page nav buttons
