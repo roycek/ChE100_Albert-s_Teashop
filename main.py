@@ -129,17 +129,11 @@ def enterReleased(event):#AH
         (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER)
     )
 
-<<<<<<< HEAD
 def valueCheck(order: dict, result: dict):#AH
     """
     (dict, dict) -> str
     Compare the required order with the minigame result.
     """
-=======
-def valueCheck(order: dict, result: dict):
-    print(order)
-    print(result)
->>>>>>> b1c94b4 (no message)
     for key in order:
         if key not in result:
             return "Bad"
