@@ -267,7 +267,6 @@ def run_minigame3(screen, clock):
                 pygame.quit()
                 sys.exit()
 
-            mouse = pygame.mouse.get_pos()  #  mouse coordinates
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Navigation (only when not casting)
                 if post_result_timer <= 0:  #  normal interaction allowed only when not showing post-result
@@ -296,6 +295,8 @@ def run_minigame3(screen, clock):
                         else:
                             post_result_text = "Spell Cast Failed." # set post ressult text to failed option
                         post_result_timer = 90  # show end screen for 1.5 seconds
+
+        mouse = pygame.mouse.get_pos()  # mouse coordinates
 
         # Draw background
         screen.blit(background_image, (0, 0))
