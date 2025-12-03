@@ -75,7 +75,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Honeywisp", # set the name of the spell
             "Aspects: Sweet +2", # set the aspects of the spell
-            ["Bramaris", "Thornvox", "Cortegen"], # set the magic words of the spell
+            ["Mellino", "Honstar", "Cortegen","Unfluxia"], # set the magic words of the spell
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/HoneyWhisper.png").convert_alpha(),
                                    (160, 160)), # set the glyph of the spell
             [
@@ -87,7 +87,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Sugar Sigil",
             "Aspects: Sweet +1",
-            ["Astralis", "Penthera", "Lumistar"],
+            ["Astralis", "Penthera", "Lumistar", "Sucrama"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/SugarSigil.png").convert_alpha(), (160, 160)),
             [
                 rel(-7, -5), rel(0,5), rel(7,-5), rel(7, 5), rel(0,-5), rel(-7,5)
@@ -97,7 +97,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Citrus Pulse",
             "Aspects: Citrus +2",
-            ["Gyrevex", "Spiraflux", "Helixor"],
+            ["Lemoana", "Spiraflux", "Helixor", "Fluxia"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/CitrusPulse.png").convert_alpha(), (160, 160)),
             [
                 rel(6,-3), rel(3,-5), rel(0,-6), rel(-3,-5), rel(-6,-3),
@@ -109,7 +109,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Lemonflare",
             "Aspects: Citrus +1, Sweet +1",
-            ["Ragamorg", "Ravelis", "Skratcha"],
+            ["Ragamorg", "Ravelis", "Skratcha", "Citraline"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/Lemonflare.png").convert_alpha(), (160, 160)),
             [
                 rel(-8,0), rel(-4,6), rel(4,6), rel(8,0), rel(2,2),
@@ -120,7 +120,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Tealeaf Rite",
             "Aspects: Tea +2",
-            ["Seraphae", "Sinuara", "Silvena"],
+            ["Seraphae", "Sinuara", "Silvena", "Invoka"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/TealeafInvocation.png").convert_alpha(), (160, 160)),
             [
                 rel(-5,7), rel(-9,-4), rel(-3,-7), rel(-7,1), rel(3,-2), rel(0,7), rel(-3,-2),
@@ -131,7 +131,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Earl Echo",
             "Aspects: Tea +1, Citrus +1",
-            ["Voltaris", "Zapkern", "Thundrix"],
+            ["Earlis", "Resona", "Citralux", "Echovera"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/EarlgreyEcho.png").convert_alpha(), (160, 160)),
             [
                 rel(-7,-10), rel(7,-10), rel(-7,-5), rel(7,-5), rel(-7,0), rel(7,0),
@@ -142,7 +142,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Chai Ember",
             "Aspects: Spice +2, Tea +1",
-            ["Loopent", "Crovis", "Torsha"],
+            ["Chalon", "Emberyx", "Masalir", "Flaretea"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/ChaiEmber.png").convert_alpha(), (160, 160)),
             [
                 rel(0,-10), rel(-6,-4), rel(4,-4), rel(9,3), rel(-6,3), rel(9,-4),
@@ -153,7 +153,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Cinnamon",
             "Aspects: Spice +1",
-            ["Rectalus", "Plaxion", "Vaulten"],
+            ["Cinnaar", "Spiralux", "Brashava", "Scorchine"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/CinnamonWeave.png").convert_alpha(), (160, 160)),
             [
                 rel(0, -10), rel(-2, -4), rel(-8, -10), rel(-4, -2),
@@ -164,7 +164,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Herb Bloom",
             "Aspects: Herbal +2",
-            ["Diacrit", "Zemmar", "Crestor"],
+            ["Herbalis", "Florien", "Sprouthex", "Budmora"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/HerbalBloom.png").convert_alpha(), (160, 160)),
             [
                 rel(0, -8), rel(6, 0), rel(0, 8), rel(-6, 0),
@@ -175,7 +175,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Ley Garden",
             "Aspects: Herbal +1, Tea +1",
-            ["Hookrun", "Trogla", "Pendrix"],
+            ["Leyward", "Gardenis", "Verdalux", "Infusara"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/GardenDraught.png").convert_alpha(), (160, 160)),
             [
                 rel(-8, 6), rel(-4, -10), rel(-1, -4),
@@ -187,24 +187,21 @@ def run_minigame3(screen, clock):
         Spell(
             "Mintwhirl",
             "Aspects: Mint +2",
-            ["Spiralux", "Orien", "Gyralon"],
+            ["Freskal", "Whirleaf", "Mentara", "Gustine"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/Mintwhirl.png").convert_alpha(), (160, 160)),
             [
-                rel(6, -2), rel(4, -6), rel(0, -8), rel(-4, -6),
-                rel(-6, -2), rel(-4, 4), rel(0, 6), rel(4, 4),
-                rel(6, 0)
+                rel(6, -2), rel(4, -6), rel(0, -8), rel(-4, -6), rel(-6, -2), rel(-4, 4),
+                rel(0, 6), rel(4, 4), rel(6, 0)
             ]
         ),
 
         Spell(
             "Frost Snap",
             "Aspects: Mint +1, Citrus +1",
-            ["Clavix", "Tremor", "Rendrix"],
+            ["Frigidis", "Zintrix", "Snaplemon", "Chillara"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/FrostmintSnap.png").convert_alpha(), (160, 160)),
             [
-                rel(0, -8), rel(0, 8),  #  vertical ray
-                rel(-8, 0), rel(8, 0),  #  horizontal ray
-                rel(-4, -4), rel(4, -4),  #  inner diamond
+                rel(0, -8), rel(0, 8), rel(-8, 0), rel(8, 0), rel(-4, -4), rel(4, -4),
                 rel(4, 4), rel(-4, 4)
             ]
         ),
@@ -212,7 +209,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Creamweave",
             "Aspects: Creamy +2",
-            ["Caffara", "Urbina", "Lacton"],
+            ["Creamora", "Velastrid", "Silkalux", "Bindara"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/CreamyWeave.png").convert_alpha(), (160, 160)),
             [
                 rel(-10, 0), rel(-8, -4), rel(-4, -7), rel(0, -8),
@@ -224,7 +221,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Velvetfoam",
             "Aspects: Creamy +1, Sweet +1",
-            ["Keelion", "Trianta", "Sailorix"],
+            ["Velveta", "Suavine", "Foamara", "Sugrith"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/Velvetfoam.png").convert_alpha(), (160, 160)),
             [
                 rel(-10, -8), rel(-6, -4), rel(-2, 0),
@@ -236,7 +233,7 @@ def run_minigame3(screen, clock):
         Spell(
             "Dark Surge",
             "Aspects: Bitter +2",
-            ["Cordalis", "Orbheart", "Amorix", "Bittera"],
+            ["Darkara", "Survex", "Ravenero", "Nightbrew"],
             pygame.transform.scale(pygame.image.load("Spell_Assets/Spell Glyphs/DarkroastSurge.png").convert_alpha(), (160, 160)),
             [
                 rel(0, -16), rel(-4, -10), rel(-2, -5), rel(0, -1), rel(2, -5), rel(4, -10),
@@ -280,6 +277,7 @@ def run_minigame3(screen, clock):
                         # if the user presses the cast button, get the spell index of the current page and run cast_spell()
                         # save the output of the spell cast to success and decrement spells remaining
                         active_spell = spells[current_page]
+                        pygame.mouse.set_pos(cx+200, cy+200)# move mouse away from spell to avoid acidentally failing
                         success = cast_spell(screen, clock, active_spell, background_image)
                         spells_remaining -= 1
                         if success:

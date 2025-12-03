@@ -75,6 +75,7 @@ currentCustomer = customerOrder[currentCustomerIndex]
 minigame = False
 waitingForNextCustomer = False
 output = None
+professors_helped = 0
 
 # "neutral", "happy", "angry"
 currentExpression = "neutral"
@@ -236,6 +237,7 @@ def main():
     global output
     global waitingForNextCustomer
     global currentExpression
+    global professors_helped
     clock = pygame.time.Clock()
 
     if (gameState == "startScreen"):
@@ -291,7 +293,6 @@ def main():
                     mainScreen.blit(textSurface, (textX, textY))
                 if(enterReleased(event)):
                     gameState = "inGame"
-                    pygame.mixer.music.stop()
                 
             elif (gameState == "inGame"):
                 if (enterReleased(event)):
@@ -328,9 +329,11 @@ def main():
                         if (result == "Perfect"):
                             dialogueNum = 4
                             currentExpression = "happy"
+                            professors_helped += 1
                         elif (result == "Good"):
                             dialogueNum = 5
                             currentExpression = "neutral"
+                            professors_helped += 1
                         else:  #Bad
                             dialogueNum = 6
                             currentExpression = "angry"
@@ -351,7 +354,7 @@ def main():
 
         elif (gameState == "gameComplete"):
             mainScreen.fill((0, 0, 0))
-            textSurface = dialogueFont.render("Thank you for playing!", True, (255, 255, 255))
+            textSurface = dialogueFont.render(f"Thank you for playing! You made {professors_helped}/4 professors happy!", True, (255, 255, 255))
             textX = (width - textSurface.get_width()) // 2
             textY = (height - textSurface.get_height()) // 2
             mainScreen.blit(textSurface, (textX, textY))
