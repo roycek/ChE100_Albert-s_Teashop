@@ -2,8 +2,11 @@ import pygame
 import sys
 import buttons
 
-import minigame3
 from minigame3 import run_minigame3
+
+"""
+Written by Albert Hwang and Bruce Roy Harold Legge
+"""
 
 pygame.init()
 
@@ -76,7 +79,7 @@ output = None
 # "neutral", "happy", "angry"
 currentExpression = "neutral"
 
-# Dialogue
+# BRHL: Dialogue
 dialogue = {
     "Zhao": [
         "Hello, hello.",
@@ -89,7 +92,7 @@ dialogue = {
     "Pendar": [
         "Good mornin'",
         "I would like a honey citrus mint tea.",
-        "And use that 'TEA-O-MATIC',\nMint: 2, Spice: 1, Citrus: 1, Sweet: 1",
+        "Good luck, this is tricky!',\nMint: 2, Spice: 1, Citrus: 1, Sweet: 1",
         "That's right! Good job!",
         "Not quite...",
         "Hmmmm, that's not it."
@@ -97,7 +100,7 @@ dialogue = {
     "Hamilton": [
         "Hey barista!",
         "Give me a tea with a \nhint of spicy sweetness,",
-        "Squeeze it 6 or 7 times\nBitter: 2, Spice: 1, Sweet: 1.",
+        "Stir it 6 or 7 times\nBitter: 2, Spice: 1, Sweet: 1.",
         "Cool!",
         "You're almost there...",
         "No, that's not it."
@@ -111,7 +114,7 @@ dialogue = {
         "I could've made tea better \nthan this when I was two years old."
     ]
 }
-# Target ingredient amounts for each customer
+# AH: Target ingredient amounts for each customer
 orderList = {
     "Zhao": {"Sweet": 1, "Bitter": 1},
     "Hamilton": {"Bitter": 2, "Spice": 1, "Sweet": 1},
@@ -119,6 +122,7 @@ orderList = {
     "Pendar": {"Mint": 2, "Spice": 1, "Citrus": 1, "Sweet": 1}
 }
 
+# By: AH
 def enterReleased(event):#AH
     '''
     (Event) -> bool
@@ -129,6 +133,7 @@ def enterReleased(event):#AH
         (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER)
     )
 
+# By: AH
 def valueCheck(order: dict, result: dict):#AH
     """
     (dict, dict) -> str
@@ -145,6 +150,7 @@ def valueCheck(order: dict, result: dict):#AH
         return "Perfect"
     return "Good"
 
+# by: BRHL
 def drawCustomerDialogue(customerName):#AH
     """
     (str) -> None
@@ -187,6 +193,7 @@ def drawCustomerDialogue(customerName):#AH
                 textY = baseY + i * lineSpacing + 30
                 mainScreen.blit(textSurface, (textX, textY))
 
+# By: AH
 def goToNextCustomer():
     """
     () -> None
@@ -216,6 +223,7 @@ def goToNextCustomer():
         dialogueNum = 0
         currentExpression = "neutral"
 
+# By: AH
 def main():
     """
     () -> None
@@ -255,18 +263,20 @@ def main():
             elif (gameState == "howToPlay"):
                 mainScreen.fill((0, 0, 0))
 
-                instructions = [#Explanation of how to play
+                instructions = [#BRHL: Explanation of how to play
                     "HOW TO PLAY",
                     "",
                     "Press ENTER to advance dialogue.",
                     "Your goal is to prepare each customer's drink",
-                    "by matching their order using the minigame.",
+                    "by casting spells to add ingredients to tea mixtures.",
                     "",
                     "The minigame works like an Euler Trail:",
                     "you must trace edges exactly once",
-                    "to choose the ingredients.",
+                    "to choose the ingredients. ",
                     "",
-                    "Match their order perfectly to earn a Perfect score!",
+                    "Be sure you dont trace the same node twice!",
+                    "",
+                    "Meet or exceed their ingredients to get a perfect score! You get 3 casts per ccustomer!",
                     "",
                     "Press ENTER to begin."
                 ]
@@ -281,6 +291,7 @@ def main():
                     mainScreen.blit(textSurface, (textX, textY))
                 if(enterReleased(event)):
                     gameState = "inGame"
+                    pygame.mixer.music.stop()
                 
             elif (gameState == "inGame"):
                 if (enterReleased(event)):
